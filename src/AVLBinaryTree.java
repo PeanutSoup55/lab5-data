@@ -1,21 +1,25 @@
-public class AVLBinaryTree {
+import java.util.HashMap;
+class Node {
+    int score;
+    String teamId;
+    int height;
+    Node left, right;
 
-    private Node root;
-
-    static class Node{
-        int score, height;
-        String teamID;
-        Node left, right;
-         Node(int score, String teamID){
-             this.score = score;
-             this.teamID = teamID;
-             this.height = 1;
-         }
-        int compareTo(int s, String t) {
-            if (this.score != s) return Integer.compare(this.score, s);
-            return this.teamID.compareTo(t);
-        }
+    Node(int score, String teamId) {
+        this.score = score;
+        this.teamId = teamId;
+        this.height = 1;
     }
+
+    int compareTo(int s, String t) {
+        if (this.score != s) return Integer.compare(this.score, s);
+        return this.teamId.compareTo(t);
+    }
+}
+
+class AVLBinaryTree {
+
+    Node root;
 
     int height(Node node) {
         if (node == null) return 0;
@@ -45,11 +49,7 @@ public class AVLBinaryTree {
         return x;
     }
 
-    Node minNode(Node node) {
-        return node.left == null ? node : minNode(node.left);
-    }
-
-    public Node Insert(Node node, int score, String teamId) {
+    Node Insert(Node node, int score, String teamId) {
         if (node == null)
             return new Node(score, teamId);
 
@@ -86,7 +86,12 @@ public class AVLBinaryTree {
 
         return node;
     }
-    public Node Delete(Node node, int score, String teamId) {
+
+    Node minNode(Node node) {
+        return node.left == null ? node : minNode(node.left);
+    }
+
+    Node Delete(Node node, int score, String teamId) {
         if (node == null) return null;
 
         int cmp = node.compareTo(score, teamId);
@@ -128,17 +133,44 @@ public class AVLBinaryTree {
 
         return node;
     }
-    public String Search(int key){
-        String value = "";
-        return value;
-    }
-    public Integer Predecessor(int key){
-        return key;
-    }
-    public Integer Successor(int key){
-        return key;
-    }
-    public AVLBinaryTree RangeQuery(int a, int b){
 
+    String Search(String teamId, java.util.HashMap<String, Integer> teams) {
+        if (!teams.containsKey(teamId)) return "NOT FOUND";
+        return teamId + " " + teams.get(teamId);
+    }
+
+    Node Predecessor(Node node, int score, String teamId, Node best) {
+        if (node == null) return best;
+        if (node.compareTo(score, teamId) < 0)
+            return Predecessor(node.right, score, teamId, node);
+        else
+            return Predecessor(node.left, score, teamId, best);
+    }
+
+    Node Successor(Node node, int score, String teamId, Node best) {
+        if (node == null) return best;
+        if (node.compareTo(score, teamId) > 0)
+            return Successor(node.left, score, teamId, node);
+        else
+            return Successor(node.right, score, teamId, best);
+    }
+
+    void RangeQuery(Node node, int lo, int hi) {
+        if (node == null) return;
+        if (node.score > lo) RangeQuery(node.left, lo, hi);
+        if (node.score >= lo && node.score <= hi)
+            System.out.println(node.teamId + " " + node.score);
+        if (node.score < hi) RangeQuery(node.right, lo, hi);
+    }
+
+    int Top(Node node, int k, int printed) {
+        if (node == null || printed >= k) return printed;
+        printed = Top(node.right, k, printed);
+        if (printed < k) {
+            System.out.println(node.teamId + " " + node.score);
+            printed++;
+        }
+        if (printed < k) printed = Top(node.left, k, printed);
+        return printed;
     }
 }
